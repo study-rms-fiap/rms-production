@@ -2,6 +2,9 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
+import { config } from 'dotenv';
+import kafka_config from '../config'
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 function buildApiDocs(app: NestExpressApplication): void {
   const config: Omit<OpenAPIObject, 'paths'> = new DocumentBuilder()
@@ -17,8 +20,27 @@ async function bootstrap() {
   const app: NestExpressApplication = await NestFactory.create(AppModule, {
     abortOnError: false,
   });
+
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.KAFKA,
+    options: {
+      client: {
+        brokers: ['broker:9092'],
+      },
+      consumer: {
+        groupId: 'payment-consumer',
+      },
+    },
+  });
+
+  await app.startAllMicroservices();
+
+
   buildApiDocs(app);
-  await app.listen(3000);
+  const port = Number(config().parsed['PORT'] || process.env.PORT);
+  console.info(`APP was assigned port ${port} to be executed`);
+  await app.listen(port);
+  console.info(`App RMS Order is running on port  ${port}`);
 }
 
 bootstrap();

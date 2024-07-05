@@ -17,6 +17,8 @@ export interface IOrder {
   status: OrderStatus;
   items: Array<IOrderItem>;
   updateStatus(status: OrderStatus): void;
+  cancel(): void;
+  confirm(): void;
 }
 
 @Entity()
@@ -51,11 +53,25 @@ export class Order implements IOrder {
     this.items = items;
     this.createdAt = DateTime.now().toISO();
     this.lastUpdate = this.createdAt;
-    this.status = OrderStatus.IN_QUEUE;
+    this.status = OrderStatus.WAITING_PAYMENT;
+  }
+
+  private setLastUpdate() {
+    this.lastUpdate = DateTime.utc().toISO();
   }
 
   updateStatus(status: OrderStatus): void {
     this.status = status;
-    this.lastUpdate = DateTime.utc().toISO();
+    this.setLastUpdate()
+  }
+
+  cancel(): void {
+    this.status = OrderStatus.CANCELLED;
+    this.setLastUpdate()
+  }
+
+  confirm(): void {
+    this.status = OrderStatus.IN_QUEUE;
+    this.setLastUpdate()
   }
 }

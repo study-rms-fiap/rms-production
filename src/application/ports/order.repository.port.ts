@@ -5,6 +5,6 @@ export interface IOrderRepository {
   findAll(): Promise<Array<IOrder>>;
   findById(id: string): Promise<IOrder>;
   findByStatus(status: OrderStatus): Promise<Array<IOrder>>;
-  save(order: Order): Promise<IOrder>;
-  update(order: Order): Promise<IOrder>;
+  save(order: IOrder): Promise<IOrder>;
+  update(order: IOrder): Promise<IOrder>;
 }
