@@ -3,7 +3,6 @@ import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import { config } from 'dotenv';
-import kafka_config from '../config'
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 function buildApiDocs(app: NestExpressApplication): void {
@@ -40,7 +39,7 @@ async function bootstrap() {
   const port = Number(config().parsed['PORT'] || process.env.PORT);
   console.info(`APP was assigned port ${port} to be executed`);
   await app.listen(port);
-  console.info(`App RMS Order is running on port  ${port}`);
+  console.info(`App RMS Production is running on port  ${port}`);
 }
 
 bootstrap();

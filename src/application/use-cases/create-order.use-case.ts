@@ -2,17 +2,27 @@ import { IOrder, Order } from 'src/domain/order/order.entity';
 import { IOrderRepository } from '../ports/order.repository.port';
 import { CreateOrderDto } from 'src/adapters/order/dto/create-order.dto';
 import { IOrderItem, OrderItem } from 'src/domain/order/order-item.entity';
+import { IPaymentRepository } from '../ports/payment.repository.port';
 
 export class CreateOrderUseCase {
-  static run(repo: IOrderRepository, orderDto: CreateOrderDto) {
-    const listOrderItems: Array<IOrderItem> = orderDto.items.map(
-      (item) => new OrderItem(item.product, item.quantity),
+  static async run(repo: IOrderRepository, paymentRepo: IPaymentRepository, orderDto: CreateOrderDto) {
+    const orderItems: Array<IOrderItem> = orderDto.items.map(
+      (item) => new OrderItem(item.id, item.name),
     );
+
     const order: IOrder = new Order(
-      orderDto.orderRef,
       orderDto.client,
-      listOrderItems,
+      orderDto.amount,
+      orderItems,
     );
-    return repo.save(order);
+
+    const savedOrder = await repo.save(order)
+
+    await paymentRepo
+      .createNewPaymentForOrder(
+        { orderId: savedOrder.id, client: savedOrder.client, amount: savedOrder.amount }
+      )
+
+    return savedOrder;
   }
 }

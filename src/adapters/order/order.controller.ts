@@ -6,17 +6,16 @@ import { CreateOrderUseCase } from 'src/application/use-cases/create-order.use-c
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { UpdateOrderStatusUseCase } from 'src/application/use-cases/update-order-status.use-case';
 import { FindAllOrdersUseCase } from 'src/application/use-cases/find-all-orders.use-case';
-import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
-import { orderPaymentDto } from './dto/order-paid.dto';
+import { PaymentRepository } from '../payment/payment.repository';
 
 @ApiTags('Orders')
-@Controller()
+@Controller('/orders')
 export class OrderController {
-  constructor(private readonly orderRepository: OrderRepository) {}
+  constructor(private readonly orderRepository: OrderRepository, private readonly paymentRepository: PaymentRepository) {}
 
   @Post()
   async createOrder(@Body() order: CreateOrderDto) {
-    const createdOrder = CreateOrderUseCase.run(this.orderRepository, order);
+    const createdOrder = CreateOrderUseCase.run(this.orderRepository, this.paymentRepository, order);
     return createdOrder;
   }
 
@@ -28,21 +27,6 @@ export class OrderController {
   @Get()
   findAllOrders() {
     return FindAllOrdersUseCase.run(this.orderRepository);
-  }
-
-  @MessagePattern('paymentservice')
-  orderPaid(@Payload()message: orderPaymentDto){
-    console.info( 'Production Service: paymentd', message)
-  }
-
-  @MessagePattern('paymentservicereply')
-  orderPaymentFailure(@Payload()message: orderPaymentDto) {
-    console.info( 'Production Service: payment reply', message)
-  }
-
-  @EventPattern('paymentservice')
-  paymentAuthorize(@Payload()data: any){
-    console.info('ORDER PAY - EVENT PATTERN', data)
   }
 }
 

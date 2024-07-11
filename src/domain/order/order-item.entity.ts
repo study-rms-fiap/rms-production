@@ -9,8 +9,7 @@ import { IOrder, Order } from './order.entity';
 
 export interface IOrderItem {
   id: string;
-  product: string;
-  quantity: number;
+  name: string;
   order: IOrder;
 }
 
@@ -20,17 +19,14 @@ export class OrderItem implements IOrderItem {
   id: string;
 
   @Column({ type: 'text', nullable: false })
-  product: string;
-
-  @Column({ type: 'int', nullable: false })
-  quantity: number;
+  name: string;
 
   @ManyToOne(() => Order, (order: Order) => order.items)
   @JoinColumn()
   order: IOrder;
 
-  constructor(product: string, quantity: number) {
-    this.product = product;
-    this.quantity = quantity;
+  constructor(id: string, name: string) {
+    this.id = id;
+    this.name = name;
   }
 }

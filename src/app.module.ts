@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Inject, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { config } from 'dotenv';
 import { Order } from './domain/order/order.entity';
@@ -6,7 +6,7 @@ import { OrderItem } from './domain/order/order-item.entity';
 import { OrderRepository } from './adapters/order/order.repository';
 import { OrderController } from './adapters/order/order.controller';
 import msConfig from '../config'
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ClientKafka, ClientsModule, Transport } from '@nestjs/microservices';
 import { PaymentController } from './adapters/payment/payment.controller';
 import { PaymentRepository } from './adapters/payment/payment.repository';
 
@@ -43,7 +43,10 @@ import { PaymentRepository } from './adapters/payment/payment.repository';
   providers: [OrderRepository, PaymentRepository],
 })
 export class AppModule {
-  constructor() {
+  
+  constructor(@Inject('PRODUCTION_API')
+  private readonly kafka: ClientKafka) {
+
     console.log('PRODUCTION DB HOST ', config().parsed['DB_HOST'] || process.env.DB_HOST);
     console.log(
       'PRODUCTION DB_PORT',
@@ -54,4 +57,8 @@ export class AppModule {
       Number(config().parsed['PORT'] || process.env.PORT),
     );
   }
+
+   onModuleInit() {
+        this.kafka.subscribeToResponseOf('process_payment')
+    }
 }
