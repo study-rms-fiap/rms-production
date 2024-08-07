@@ -5,13 +5,14 @@ import { Order } from './domain/order/order.entity';
 import { OrderItem } from './domain/order/order-item.entity';
 import { OrderRepository } from './adapters/order/order.repository';
 import { OrderController } from './adapters/order/order.controller';
-import msConfig from '../config'
 import { ClientKafka, ClientsModule, Transport } from '@nestjs/microservices';
 import { PaymentController } from './adapters/payment/payment.controller';
 import { PaymentRepository } from './adapters/payment/payment.repository';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     ClientsModule.register([
       {
         name: 'PRODUCTION_API',
@@ -46,7 +47,6 @@ export class AppModule {
   
   constructor(@Inject('PRODUCTION_API')
   private readonly kafka: ClientKafka) {
-
     console.log('PRODUCTION DB HOST ', config().parsed['DB_HOST'] || process.env.DB_HOST);
     console.log(
       'PRODUCTION DB_PORT',

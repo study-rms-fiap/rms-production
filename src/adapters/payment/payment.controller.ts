@@ -1,23 +1,23 @@
-import { Controller, Inject, OnModuleInit, Post } from "@nestjs/common";
-import { ClientKafka, EventPattern, MessagePattern, Payload } from "@nestjs/microservices";
+import { Controller, OnModuleInit } from "@nestjs/common";
+import { EventPattern, Payload } from "@nestjs/microservices";
 import { ApiTags } from "@nestjs/swagger";
-import { OrderPaymentDto } from "./dto/order-payment.dto";
-import { PaymentRepository } from "./payment.repository";
+import { ProcessPaymentDto } from "./dto/process-payment.dto";
+import { ProcessPaymentUseCase } from "src/application/use-cases/process-payment.use-case";
+import { OrderRepository } from "../order/order.repository";
 
 @ApiTags('Payment')
 @Controller()
 export class PaymentController implements OnModuleInit {
-
     constructor(
-        private payment: PaymentRepository,
+        private orderRepository: OrderRepository
     ) { }
 
-    // vai engatilhar quando recebermos o pagamento
     @EventPattern('process_payment')
-    async listePayments(@Payload() message: OrderPaymentDto) {
-        console.log('PRODUCTION - process_payment', message)
-    }
+    async listePayments(@Payload() message: ProcessPaymentDto) {
 
+        console.info('msg do kakfa process_payment', message)
+        ProcessPaymentUseCase.run(this.orderRepository, message)
+    }
 
     onModuleInit() {
     }
