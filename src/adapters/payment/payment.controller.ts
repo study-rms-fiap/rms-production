@@ -15,7 +15,7 @@ export class PaymentController implements OnModuleInit {
     @EventPattern('process_payment')
     async listePayments(@Payload() message: ProcessPaymentDto) {
 
-        console.info('msg do kakfa process_payment', message)
+        console.info('------ Queue process_payment ------', message)
         ProcessPaymentUseCase.run(this.orderRepository, message)
     }
 

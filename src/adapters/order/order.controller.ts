@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OrderRepository } from './order.repository';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -7,6 +7,7 @@ import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { UpdateOrderStatusUseCase } from 'src/application/use-cases/update-order-status.use-case';
 import { FindAllOrdersUseCase } from 'src/application/use-cases/find-all-orders.use-case';
 import { PaymentRepository } from '../payment/payment.repository';
+import { ListProductionQueueUseCase } from 'src/application/use-cases/list-production-queue.use-case';
 
 @ApiTags('Orders')
 @Controller('/orders')
@@ -17,6 +18,12 @@ export class OrderController {
   @ApiOperation({ summary: 'List all orders' })
   findAllOrders() {
     return FindAllOrdersUseCase.run(this.orderRepository);
+  }
+
+  @Get('production-queue')
+  @ApiOperation({ summary: 'List order ready for production' })
+  findOrderByStatus() {
+    return ListProductionQueueUseCase.run(this.orderRepository)
   }
 
   @Post()
